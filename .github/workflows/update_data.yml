@@ -1,0 +1,26 @@
+name: Cloud Sync Proxy
+on:
+  repository_dispatch:
+    types: [update-tasks] # Активується за запитом з вашого сайту
+
+jobs:
+  update-json:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Update tasks.json
+        run: |
+          # Створюємо папку, якщо її немає
+          mkdir -p data
+          # Записуємо дані, отримані з сайту, у файл
+          echo '${{ github.event.client_payload.tasks }}' > data/tasks.json
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name "Cloud-Planner-Bot"
+          git config --global user.email "bot@github.com"
+          git add data/tasks.json
+          git commit -m "Автоматичне оновлення даних з інтерфейсу"
+          git push
